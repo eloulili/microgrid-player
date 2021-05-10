@@ -39,3 +39,9 @@ class Player:
 	def reset(self):
 		# reset all observed data
 		pass
+
+	
+if __name__ == '__main__':
+	mon_acteur = Player()
+	load_0 = mon_acteur.compute_load(0)
+	load_0 = mon_acteur.compute_load(1)	
