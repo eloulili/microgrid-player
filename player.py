@@ -2,6 +2,30 @@
 # this class combines all basic features of a generic player
 import numpy as np
 
+"""
+pseudo code du coordinateur
+p = np.rand(48)
+prices = {"purchase": p, "sale": p}
+
+p = Player()
+## pour tous les acteurs sauf la station de recharge 
+## scenario_data est un np.array de taille 48
+## pour la station de recharge
+## scenario_data est:
+## def set_scenario(self, scenario_data):
+##        arr_dep = list(scenario_data.values())[:self.nb_slow+self.nb_fast]
+##        self.depart = {"slow": [d[1] for d in arr_dep[:self.nb_slow]], "fast": [d[1] for d in arr_dep[self.nb_slow:self.nb_fast+self.nb_slow]]}
+##        self.arrival = {"slow": [d[0] for d in arr_dep[:self.nb_slow]], "fast": [d[0] for d in arr_dep[self.nb_slow:self.nb_fast+self.nb_slow]]}
+
+p.set_scenario(scenario_data)
+
+
+for i in range(N):
+    p.set_prices(prices)
+    load_player_24h = p.compute_all_load()
+
+
+"""
 
 class Player:
 
