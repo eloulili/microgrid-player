@@ -2,6 +2,12 @@
 # this class combines all basic features of a generic player
 import numpy as np
 from pulp import *
+import pandas as pd
+from pulp import *
+import numpy as np
+sys.path.append(os.getcwd()+'/../../')
+df = pd.read_csv("data_center_weekly_scenarios.csv", sep = ";")
+l_IT_global = np.array(df["cons (kW)"])
 
 """
 pseudo code du coordinateur
@@ -30,8 +36,8 @@ for i in range(N):
 EER = 4
 dt = 0.5
 COP_CS = EER + 1
-Tcom = 60
-Tr = 35
+Tcom = 60 +273
+Tr = 35 +273
 e = 0.5
 COP_HP = Tcom * e / (Tcom - Tr)
 p_HW = np.array([0.2 for i in range(48)])
@@ -62,21 +68,23 @@ class Data_center:
         return load
 
     def take_decision(self, time):
-        l_IT = np.array(self.data())
+        l_IT = np.array([l_IT_global[i+time]]for i in range(self.horizon)) #on étudie le scénario à partir de la consommation minimale entre t et t+24h
         lambdas = self.prices()
         problem = LpProblem("data_center", LpMinimize)
         alphas = [0 for i in range(48)]
-        for i in range(48):
+        alpha = [0 for i in range(48)]
+        LI = [0 for i in range(48)]
+        for i in range(horizon):
             var_name = "alpha_" + str(i)
             alphas[i] = LpVariable(var_name, 0.0, 1.0)
 
-        l_NF = [0 for i in range(48)]
-        h_r = [0 for i in range(48)]
-        l_HP = [0 for i in range(48)]
-        h_DC = [0 for i in range(48)]
-        li = [0 for i in range(48)]
+        l_NF = [0 for i in range(self.horizon)]
+        h_r = [0 for i in range(self.horizon)]
+        l_HP = [0 for i in range(self.horizon)]
+        h_DC = [0 for i in range(self.horizon)]
+        li = [0 for i in range(self.horizon)]
 
-        for t in range(48):
+        for t in range(self.horizon):
             l_NF[t] = (1 + 1 / (EER * dt)) * l_IT[t]
             h_r[t] = l_IT[t] * COP_CS / EER
             l_HP[t] = alphas[t] * h_r[t] / ((COP_HP - 1) * dt)
@@ -85,11 +93,15 @@ class Data_center:
             problem += h_DC[t] <= 10
             li[t] = l_HP[t] + l_NF[t]
 
-        problem += np.sum([lambdas[i] * (l_NF[i] + h_DC[i]) - p_HW[i] * h_DC[i] for i in range(48)]), "objectif"
+        problem += np.sum([lambdas[i] * (l_NF[i] + h_DC[i]) - p_HW[i] * h_DC[i] for i in range(self.horizon)]), "objectif"
 
         problem.solve()
-        print("Prix total : ", value(problem.objective))
-        return alphas, li
+        for i in range (48):
+            alpha[i] = alphas[i].value()
+            LI[i] = li[i].value() #permet d'avoir les aleurs effectives
+
+        self.set_scenario(LI)# on actualise la consommation effective pour la journée qui vient
+        return 0
 
     def compute_load(self, time):
         load = self.take_decision(time)
