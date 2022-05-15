@@ -8,7 +8,7 @@ import numpy as np
 sys.path.append(os.getcwd()+'/../../')
 df = pd.read_csv("data_center_weekly_scenarios.csv", sep = ";")
 l_IT_global = np.array(df["cons (kW)"])
-
+hotwater_price_prevision
 """
 pseudo code du coordinateur
 p = np.rand(48)
@@ -40,7 +40,7 @@ Tcom = 60 +273
 Tr = 35 +273
 e = 0.5
 COP_HP = Tcom * e / (Tcom - Tr)
-p_HW = np.array([0.2 for i in range(48)])
+
 
 
 class Data_center:
@@ -93,7 +93,7 @@ class Data_center:
             problem += h_DC[t] <= 10
             li[t] = l_HP[t] + l_NF[t]
 
-        problem += np.sum([lambdas[i] * (l_NF[i] + h_DC[i]) - p_HW[i] * h_DC[i] for i in range(self.horizon)]), "objectif"
+        problem += np.sum([lambdas[i] * (l_NF[i] + h_DC[i]) - hotwater_price_prevision[i] * h_DC[i] for i in range(self.horizon)]), "objectif"
 
         problem.solve()
         for i in range (48):
